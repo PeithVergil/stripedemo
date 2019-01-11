@@ -49,12 +49,21 @@ class Order(BaseRequestHandler):
             },
         )
 
+        if order.status == 'created':
+            self.order_done(order)
+        else:
+            self.order_fail()
+
+    def order_done(self, order):
         self.write(dict(
-            card=card,
-            token=token,
-            status='token_invalid',
-            message='The given access token does not '
-                    'exist or may have already expired.',
-            order=order,
-            customer=customer,
+            data=order,
+            status='order_successful',
+            message='A new order has been created.',
+        ))
+
+    def order_fail(self):
+        self.set_status(400)
+        self.write(dict(
+            status='order_failed',
+            message='Unable to create a new order.',
         ))

@@ -150,6 +150,11 @@
                     $.post(globals.STRIPE_ORDER_URL, params, function(response) {
                         console.log('handleCreateTokenDone response...');
                         console.log(response);
+
+                        if (response.status === 'order_successful') {
+                            alert(response.message);
+                            window.location.reload();
+                        }
                     });
                 }
 
