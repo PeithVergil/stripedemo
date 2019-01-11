@@ -1,0 +1,159 @@
+{% extends '../base.html' %}
+
+{% block page %}
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-8">
+            <h1>SHUT UP AND TAKE MY MONEY!</h1>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-6 offset-3">
+            <h2 class="h2 review-checkout-page__h2">Enter Your Payment Details</h2>
+              
+            <form id="review-payment-form" class="review-payment-form">
+                <div class="mb-3">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" value="" required="" placeholder="John Doe">
+                    <div class="invalid-feedback">
+                        Please enter your name.
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="phone">Phone</label>
+                        <input type="text" class="form-control" id="phone" value="" placeholder="(123) 456-7890">
+                        <div class="invalid-feedback">
+                            Valid phone number is required.
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="postal">Postal/ZIP Code</label>
+                        <input type="text" class="form-control" id="postal" value="" required="" placeholder="1234">
+                        <div class="invalid-feedback">
+                            Valid postal/zip code is required.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div id="card-element" class="card-element"></div>
+                </div>
+
+                <hr class="mb-4">
+
+                <button class="btn btn-primary btn-lg btn-block" type="submit">
+                    Pay Now
+                </button>
+            </form>
+        </div>
+      </div>
+    </div>
+{% end %}
+
+{% block scripts %}
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <script>
+        (function(globals) {
+            globals.STRIPE_PUBLIC_KEY = '{{ stripe_public_key }}';
+            globals.STRIPE_ORDER_URL = '{{ reverse_url("order") }}';
+        }(window));        
+    </script>
+
+    <script>
+        (function(globals, $) {
+            // DOM is ready.
+            $(function() {
+                // The main content container.
+                var $container = $('#container');
+
+                // Error message container.
+                var $errorMessage = $('div#outcome > div.error');
+
+                // Form fields.
+                var $name = $('input[type=text]#name');
+                var $phone = $('input[type=text]#phone');
+                var $postal = $('input[type=text]#postal');
+                
+                var stripe = Stripe(globals.STRIPE_PUBLIC_KEY);
+                
+                var elements = stripe.elements();
+
+                var card = elements.create('card', {
+                    style: {
+                        base: {
+                            lineHeight: '48px',
+                            fontFamily: '"Helvetica Neue", "Helvetica", sans-serif',
+                            fontWeight: 400,
+                            fontSize: '16px',
+                        },
+                    },
+                    hidePostalCode: true,
+                });
+
+                card.mount('#card-element');
+
+                function handleCreateToken(result) {
+                    var error = result.error;
+                    var token = result.token;
+
+                    if ((typeof error) !== 'undefined') {
+                        handleCreateTokenFail(error);
+                    } else {
+                        handleCreateTokenDone(token);
+                    }
+                }
+
+                function handleCreateTokenDone(token) {
+                    var url = globals.STRIPE_ORDER_URL;
+                    var card = token.card;
+                    
+                    console.log('handleCreateTokenDone token...');
+                    console.log(token);
+
+                    var params = {
+                        stripeCard: card.id,
+                        stripeToken: token.id,
+                    };
+
+                    console.log('handleCreateTokenDone params...');
+                    console.log(params);
+                    $.post(url, params, function(response) {
+                        console.log('handleCreateTokenDone response...');
+                        console.log(response);
+                    });
+                }
+
+                function handleCreateTokenFail(error) {
+                    alert(error.message);
+                }
+
+                $('form#review-payment-form').submit(function(e) {
+                    e.preventDefault();
+
+                    var name = $.trim($name.val());
+                    if (name.length === 0) {
+                        alert('Name is required');
+                        return;
+                    }
+
+                    var postal = $.trim($postal.val());
+                    if (postal.length === 0) {
+                        alert('Postal/ZIP Code is required.');
+                        return;
+                    }
+
+                    var extraDetails = {
+                        name: name,
+                        address_zip: postal,
+                    };
+
+                    stripe.createToken(card, extraDetails).then(handleCreateToken);
+                });
+            });
+        }(window, jQuery));
+    </script>
+{% end %}
