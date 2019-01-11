@@ -2,39 +2,63 @@
 
 {% block page %}
     <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-8">
-            <h1>SHUT UP AND TAKE MY MONEY!</h1>
+        <div class="mt-4 mb-4">
+            <h1 class="text-center">SHUT UP AND TAKE MY MONEY!</h1>
         </div>
-      </div>
+
+        <div class="row">
+            <div class="col-6 offset-3">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="plan" id="planGold" value="sku_CI25CoewzpG1rg" checked>
+                            <label class="form-check-label" for="planGold">
+                                Gold
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="plan" id="planPlat" value="sku_CI25JMdlgYZ4nh">
+                            <label class="form-check-label" for="planPlat">
+                                Platinum
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="plan" id="planDiam" value="sku_CI25WE3Natp2b7">
+                            <label class="form-check-label" for="planDiam">
+                                Diamond
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6 offset-3">
+                <hr class="mt-4 mb-4">
+            </div>
+        </div>
 
       <div class="row">
         <div class="col-6 offset-3">
-            <h2 class="h2 review-checkout-page__h2">Enter Your Payment Details</h2>
+            <h2 class="mb-4 text-center">Payment Details</h2>
               
             <form id="review-payment-form" class="review-payment-form">
                 <div class="mb-3">
-                    <label for="name">Name</label>
-                    <input type="text" class="form-control" id="name" value="" required="" placeholder="John Doe">
+                    <input type="text" class="form-control" id="name" value="" required="" placeholder="Name">
                     <div class="invalid-feedback">
                         Please enter your name.
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="phone">Phone</label>
-                        <input type="text" class="form-control" id="phone" value="" placeholder="(123) 456-7890">
-                        <div class="invalid-feedback">
-                            Valid phone number is required.
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="postal">Postal/ZIP Code</label>
-                        <input type="text" class="form-control" id="postal" value="" required="" placeholder="1234">
-                        <div class="invalid-feedback">
-                            Valid postal/zip code is required.
-                        </div>
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="email" value="" required="" placeholder="Email">
+                    <div class="invalid-feedback">
+                        Please enter your email.
                     </div>
                 </div>
 
@@ -42,7 +66,7 @@
                     <div id="card-element" class="card-element"></div>
                 </div>
 
-                <hr class="mb-4">
+                <hr class="mt-4 mb-4">
 
                 <button class="btn btn-primary btn-lg btn-block" type="submit">
                     Pay Now
@@ -75,8 +99,7 @@
 
                 // Form fields.
                 var $name = $('input[type=text]#name');
-                var $phone = $('input[type=text]#phone');
-                var $postal = $('input[type=text]#postal');
+                var $email = $('input[type=text]#email');
                 
                 var stripe = Stripe(globals.STRIPE_PUBLIC_KEY);
                 
@@ -108,27 +131,30 @@
                 }
 
                 function handleCreateTokenDone(token) {
-                    var url = globals.STRIPE_ORDER_URL;
                     var card = token.card;
                     
                     console.log('handleCreateTokenDone token...');
                     console.log(token);
 
                     var params = {
+                        sku: $('input[type=radio][name=plan]:checked').val(),
+                        name: $name.val(),
+                        email: $email.val(),
                         stripeCard: card.id,
                         stripeToken: token.id,
                     };
 
                     console.log('handleCreateTokenDone params...');
                     console.log(params);
-                    $.post(url, params, function(response) {
+
+                    $.post(globals.STRIPE_ORDER_URL, params, function(response) {
                         console.log('handleCreateTokenDone response...');
                         console.log(response);
                     });
                 }
 
                 function handleCreateTokenFail(error) {
-                    alert(error.message);
+                    alert(error.code + ' - ' + error.message);
                 }
 
                 $('form#review-payment-form').submit(function(e) {
@@ -140,15 +166,14 @@
                         return;
                     }
 
-                    var postal = $.trim($postal.val());
-                    if (postal.length === 0) {
-                        alert('Postal/ZIP Code is required.');
+                    var email = $.trim($email.val());
+                    if (email.length === 0) {
+                        alert('Email is required');
                         return;
                     }
 
                     var extraDetails = {
                         name: name,
-                        address_zip: postal,
                     };
 
                     stripe.createToken(card, extraDetails).then(handleCreateToken);

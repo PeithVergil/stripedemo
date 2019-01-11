@@ -16,7 +16,7 @@
     <link href="{{ static_url('styles/style.css') }}" rel="stylesheet">
   </head>
 
-  <body class="text-center">
+  <body>
 
     {% block page %}{% end %}
 
@@ -24,7 +24,7 @@
         {% set now = datetime.datetime.now() %}
         <div class="row">
             <div class="col-12">
-                <p class="mt-5 mb-5 text-muted">&copy; {{ now.year }}</p>
+                <p class="mt-5 mb-5 text-muted text-center">&copy; {{ now.year }}</p>
             </div>
         </div>
     </div>
