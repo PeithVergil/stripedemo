@@ -3,10 +3,15 @@ import stripe
 from ..settings import STRIPE_SECRET_KEY
 
 
-stripe.api_key = STRIPE_SECRET_KEY
-
 
 class StripeProvider:
+
+    """
+    A simple wrapper to the Stripe library.
+    """
+
+    def __init__(self):
+        stripe.api_key = STRIPE_SECRET_KEY
 
     def create_customer(self, email, source, metadata=None):
         customer = stripe.Customer.create(

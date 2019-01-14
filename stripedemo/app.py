@@ -13,6 +13,7 @@ from .settings import (
     STATIC_PATH,
     TEMPLATE_PATH,
 )
+from .session.provider import SessionProvider
 
 
 if DEBUG:
@@ -42,6 +43,14 @@ class StripeDemo:
             _loop = IOLoop.current()
             setattr(self, '_loop', _loop)
         return _loop
+
+    @property
+    def session(self):
+        _session = getattr(self, '_session', None)
+        if _session is None:
+            _session = SessionProvider(self)
+            setattr(self, '_session', _session)
+        return _session
 
     @property
     def settings(self):
@@ -83,8 +92,10 @@ class StripeDemo:
         """
         Run the callable "func" in a separate thread.
         """
-        return self.loop.run_in_executor(self.pool, func, *args, **kwargs)
+        return self.loop.run_in_executor(self.executor, func, *args, **kwargs)
 
     def start(self):
+        logger.info('Listening on port: {}'.format(PORT))
+
         self.app.listen(PORT)
         self.loop.start()
