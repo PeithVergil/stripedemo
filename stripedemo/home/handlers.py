@@ -1,3 +1,4 @@
+from ..core.decorators import login_required
 from ..core.handlers import BaseRequestHandler
 
 from ..settings import STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY
@@ -6,6 +7,7 @@ from .provider import stripe_provider
 
 class Index(BaseRequestHandler):
 
+    @login_required
     def get(self):
         self.render(
             'home/index.html',

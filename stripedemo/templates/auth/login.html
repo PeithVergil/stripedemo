@@ -1,0 +1,84 @@
+{% extends '../base.html' %}
+
+{% block page %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-4">
+                <form id="form-signin" class="form-signin">
+                    {% module xsrf_form_html() %}
+
+                    <img class="mb-4" src="https://getbootstrap.com/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
+
+                    {% if messages %}
+                        {% for field_name, field_error in messages.items() %}
+                            <div class="alert alert-danger" role="alert">
+                                <strong>{{ field_name }}:</strong> {{ field_error }}
+                            </div>
+                        {% end %}
+                    {% end %}
+
+                    <div class="mb-2">
+                        <input type="email" id="id_username" class="form-control" name="username" value="{{ username }}" placeholder="Email Address" required autofocus>
+                    </div>
+
+                    <div class="mb-2">
+                        <input type="password" id="id_password" class="form-control" name="password" value="{{ password }}" placeholder="Password" required>
+                    </div>
+
+                    <hr class="mt-4 mb-4">
+
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+
+                    <input type="hidden" name="redirect" value="{{ redirect }}">
+                </form>
+            </div>
+        </div>
+    </div>
+{% end %}
+
+{% block scripts %}
+    <script>
+        (function(global) {
+            var Auth = {
+                TOKENS_URL: '{{ tokens_url }}',
+
+                login: function(username, password) {
+                    var result = $.post(this.TOKENS_URL, $.param({
+                        username: username,
+                        password: password,
+                    }));
+
+                    result.done(this.onLoginDone.bind(this));
+                    result.fail(this.onLoginFail.bind(this));
+                },
+
+                onLoginDone: function(result) {
+                    console.log('onLoginDone...');
+                    console.log(result);
+                },
+
+                onLoginFail: function(result) {
+                    console.log('onLoginFail...');
+                    console.log(result);
+                },
+            };
+
+            global.Auth = Auth;
+        })(window);
+    </script>
+
+    <script>
+        (function($) {
+            $(function() {
+                $('form#form-signin').submit(function(event) {
+                    event.preventDefault();
+
+                    Auth.login(
+                        $('input#id_username').val(),
+                        $('input#id_password').val(),
+                    );
+                });
+            });
+        })(jQuery);
+    </script>
+{% end %}

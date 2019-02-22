@@ -13,6 +13,7 @@ from .settings import (
     STATIC_PATH,
     TEMPLATE_PATH,
 )
+from .auth.provider import AuthProvider
 from .session.provider import SessionProvider
 
 
@@ -35,6 +36,14 @@ class StripeDemo:
             _app = Application(build_routes(self), **self.settings)
             setattr(self, '_app', _app)
         return _app
+
+    @property
+    def auth(self):
+        _auth = getattr(self, '_auth', None)
+        if _auth is None:
+            _auth = AuthProvider(self)
+            setattr(self, '_auth', _auth)
+        return _auth
 
     @property
     def loop(self):
