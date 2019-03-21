@@ -4,7 +4,7 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-4">
-                <form id="form-signin" class="form-signin">
+                <form id="form-signin" class="form-signin" method="post">
                     {% module xsrf_form_html() %}
 
                     <img class="mb-4" src="https://getbootstrap.com/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
@@ -34,51 +34,4 @@
             </div>
         </div>
     </div>
-{% end %}
-
-{% block scripts %}
-    <script>
-        (function(global) {
-            var Auth = {
-                TOKENS_URL: '{{ tokens_url }}',
-
-                login: function(username, password) {
-                    var result = $.post(this.TOKENS_URL, $.param({
-                        username: username,
-                        password: password,
-                    }));
-
-                    result.done(this.onLoginDone.bind(this));
-                    result.fail(this.onLoginFail.bind(this));
-                },
-
-                onLoginDone: function(result) {
-                    console.log('onLoginDone...');
-                    console.log(result);
-                },
-
-                onLoginFail: function(result) {
-                    console.log('onLoginFail...');
-                    console.log(result);
-                },
-            };
-
-            global.Auth = Auth;
-        })(window);
-    </script>
-
-    <script>
-        (function($) {
-            $(function() {
-                $('form#form-signin').submit(function(event) {
-                    event.preventDefault();
-
-                    Auth.login(
-                        $('input#id_username').val(),
-                        $('input#id_password').val(),
-                    );
-                });
-            });
-        })(jQuery);
-    </script>
 {% end %}

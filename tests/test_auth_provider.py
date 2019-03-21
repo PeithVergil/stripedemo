@@ -1,3 +1,5 @@
+import random
+
 from tornado.testing import gen_test
 
 from stripedemo.auth.models import Token
@@ -37,6 +39,48 @@ class TestPasswordUtils(BaseTestCase):
         self.assertTrue(password_check(unhashed_password, hashed_password))
 
 
+class TestVerifyCustomer(BaseTestCase):
+
+    """
+    To run this test:
+
+        python -m tornado.testing tests.test_auth_provider.TestVerifyCustomer
+    """
+
+    def setUp(self):
+        self._customer = None
+
+    def tearDown(self):
+        if self._customer is not None:
+            self._customer.delete_instance()
+
+    # def test_existing_customer(self):
+    #     unhashed_password = 'abcdef'
+    #     hashed_password = password_hash(unhashed_password, 'f7e51bde')
+    #     self.assertEqual(
+    #         hashed_password,
+    #         'f7e51bde$04C800796024574AD453F8A18C2E'
+    #         'FFA0C75C8B64F4338C230E5E20EF0BB9E0ED'
+    #     )
+    #     self.assertTrue(password_check(unhashed_password, hashed_password))
+
+    def test_new_customer(self):
+        user_id = random.randint(1, 999999)
+
+        self._customer = self.stripe.verify_customer(
+            email=settings.TEST_USERNAME,
+            source='tok_visa',
+            metadata=dict(
+                name='Sample Customer',
+                user_id=user_id,
+            ),
+        )
+        self.assertIsNotNone(self._customer)
+        self.assertIsNotNone(self._customer.email)
+        self.assertIsNotNone(self._customer.customer_id)
+        self.assertEqual(self._customer.email, settings.TEST_USERNAME)
+
+
 class BaseAuthProviderTest(BaseAsyncTestCase):
 
     @property
@@ -58,7 +102,6 @@ class TestLogin(BaseAuthProviderTest):
             settings.TEST_USERNAME,
             settings.TEST_PASSWORD,
         )
-        import pdb; pdb.set_trace()
         self.assertIsNotNone(result)
 
     @gen_test(timeout=10)
@@ -106,7 +149,6 @@ class TestAuthenticate(BaseAuthProviderTest):
             settings.TEST_USERNAME,
             settings.TEST_PASSWORD,
         )
-        import pdb; pdb.set_trace()
         self.assertIsNotNone(result)
         self.assertIsNotNone(result.token)
         self.assertIsNotNone(result.user)

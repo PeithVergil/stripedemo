@@ -1,12 +1,8 @@
 from unittest import TestCase
-from concurrent.futures import ThreadPoolExecutor
 
 from tornado.testing import AsyncTestCase, AsyncHTTPTestCase
 
 from stripedemo import app
-
-
-_executor = ThreadPoolExecutor(4)
 
 
 class TestMixin(object):
@@ -18,6 +14,10 @@ class TestMixin(object):
             _main = app.StripeDemo()
             setattr(self, '_main', _main)
         return _main
+
+    @property
+    def stripe(self):
+        return self.main.stripe
 
     @property
     def session(self):

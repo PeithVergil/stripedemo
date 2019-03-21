@@ -14,6 +14,7 @@ from .settings import (
     TEMPLATE_PATH,
 )
 from .auth.provider import AuthProvider
+from .home.provider import StripeProvider
 from .session.provider import SessionProvider
 
 
@@ -52,6 +53,14 @@ class StripeDemo:
             _loop = IOLoop.current()
             setattr(self, '_loop', _loop)
         return _loop
+
+    @property
+    def stripe(self):
+        _stripe = getattr(self, '_stripe', None)
+        if _stripe is None:
+            _stripe = StripeProvider()
+            setattr(self, '_stripe', _stripe)
+        return _stripe
 
     @property
     def session(self):

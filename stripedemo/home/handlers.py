@@ -1,3 +1,5 @@
+import random
+
 from ..core.decorators import login_required
 from ..core.handlers import BaseRequestHandler
 
@@ -7,7 +9,7 @@ from .provider import stripe_provider
 
 class Index(BaseRequestHandler):
 
-    @login_required
+    # @login_required
     def get(self):
         self.render(
             'home/index.html',
@@ -19,30 +21,59 @@ class Index(BaseRequestHandler):
 class Order(BaseRequestHandler):
 
     def post(self):
-        sku = self.get_argument('sku')
+        if not self.create_stripe_customer():
+            self.set_status(400)
+            self.write(dict(
+                status='customer_failed',
+                message='Unable to create a new Stripe customer.',
+            ))
+            return
+
+        if not self.create_stripe_order():
+            self.set_status(400)
+            self.write(dict(
+                status='order_failed',
+                message='Unable to create a new Stripe order.',
+            ))
+            return
+
+        self.write(dict(
+            data=self.order,
+            status='order_successful',
+            message='A new Stripe order has been created.',
+        ))
+
+    def create_stripe_customer(self):
         name = self.get_argument('name')
         email = self.get_argument('email')
-
-        card = self.get_argument('stripeCard')
         token = self.get_argument('stripeToken')
 
-        customer = stripe_provider.create_customer(
+        # TODO: Use an actual user ID.
+        user_id = random.randint(1, 999999)
+
+        self.customer = stripe_provider.verify_customer(
             email=email,
             source=token,
             metadata=dict(
                 name=name,
-                user_id=123456,
+                user_id=user_id,
             ),
         )
+        if self.customer is None:
+            return False
+        return True
 
-        order = stripe_provider.create_order(
+    def create_stripe_order(self):
+        sku = self.get_argument('sku')
+
+        self.order = stripe_provider.create_order(
             [
                 {
                     'type': 'sku',
                     'parent': sku,
                 }
             ],
-            customer,
+            self.customer,
             metadata={
                 'order_id': 12345,
                 'product': 'Platinum',
@@ -50,22 +81,6 @@ class Order(BaseRequestHandler):
                 'track': 'Sample Track',
             },
         )
-
-        if order.status == 'created':
-            self.order_done(order)
-        else:
-            self.order_fail()
-
-    def order_done(self, order):
-        self.write(dict(
-            data=order,
-            status='order_successful',
-            message='A new order has been created.',
-        ))
-
-    def order_fail(self):
-        self.set_status(400)
-        self.write(dict(
-            status='order_failed',
-            message='Unable to create a new order.',
-        ))
+        if self.order is None:
+            return False
+        return True
