@@ -76,6 +76,9 @@ class StripeProvider:
             metadata=metadata,
         )
         return order
+    
+    def pay_order(self, order_id, customer_id):
+        return stripe.Order.pay(order_id, customer=customer_id)
 
     def create_stripe_customer(self, email, source, metadata=None):
         logger.info(

@@ -29,6 +29,10 @@ class BaseRequestHandler(RequestHandler):
         return self.main.auth
 
     @property
+    def stripe(self):
+        return self.main.stripe
+
+    @property
     def session(self):
         return self.main.session
 

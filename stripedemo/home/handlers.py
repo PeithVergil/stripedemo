@@ -4,7 +4,6 @@ from ..core.decorators import login_required
 from ..core.handlers import BaseRequestHandler
 
 from ..settings import STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY
-from .provider import stripe_provider
 
 
 class Index(BaseRequestHandler):
@@ -51,7 +50,7 @@ class Order(BaseRequestHandler):
         # TODO: Use an actual user ID.
         user_id = random.randint(1, 999999)
 
-        self.customer = stripe_provider.verify_customer(
+        self.customer = self.stripe.verify_customer(
             email=email,
             source=token,
             metadata=dict(
@@ -66,16 +65,19 @@ class Order(BaseRequestHandler):
     def create_stripe_order(self):
         sku = self.get_argument('sku')
 
-        self.order = stripe_provider.create_order(
+        # TODO: Use an actual order ID.
+        order_id = random.randint(1, 999999)
+
+        self.order = self.stripe.create_order(
             [
                 {
                     'type': 'sku',
                     'parent': sku,
                 }
             ],
-            self.customer,
+            self.customer.customer_id,
             metadata={
-                'order_id': 12345,
+                'order_id': order_id,
                 'product': 'Platinum',
                 'artist': 'Sample Artist',
                 'track': 'Sample Track',
@@ -83,4 +85,7 @@ class Order(BaseRequestHandler):
         )
         if self.order is None:
             return False
+
+        self.order.pay(customer=self.customer.customer_id)
+        
         return True
