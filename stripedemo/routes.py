@@ -2,6 +2,7 @@ from tornado.web import url
 
 from .auth import handlers as auth
 from .home import handlers as home
+from .subs import handlers as subs
 
 
 def build_routes(main):
@@ -32,5 +33,19 @@ def build_routes(main):
             auth.Tokens,
             kwargs,
             name='tokens',
+        ),
+
+        # Stripe subscription demo
+        url(
+            r'/subs',
+            subs.Index,
+            kwargs,
+            name='subs',
+        ),
+        url(
+            r'/subscribe',
+            subs.Subscribe,
+            kwargs,
+            name='subscribe',
         ),
     ]

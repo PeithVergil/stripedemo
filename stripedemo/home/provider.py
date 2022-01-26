@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 
 from ..settings import STRIPE_SECRET_KEY
-from .models import Customer
+from .models import Customer, Subscription
 
 
 logger = logging.getLogger(__name__)
@@ -79,6 +79,36 @@ class StripeProvider:
     
     def pay_order(self, order_id, customer_id):
         return stripe.Order.pay(order_id, customer=customer_id)
+    
+    def create_subscription(self, items, customer, metadata=None):
+        order = stripe.Subscription.create(
+            items=items,
+            customer=customer,
+            metadata=metadata,
+        )
+        return order
+    
+    def insert_subscription(self, customer_id, subscription_id):
+        logger.info(
+            'Inserting new subscription info into the database: {}'.format(subscription_id)
+        )
+
+        now = datetime.utcnow()
+        try:
+            subscription = Subscription.create(
+                customer_id=customer_id,
+                subscription_id=subscription_id,
+                date_created=now,
+                date_updated=now,
+            )
+        except peewee.DatabaseError as error:
+            logger.exception(
+                'Failed to insert a new subscription into the database.'
+            )
+        else:
+            logger.info('New subscription: {}'.format(subscription))
+            return subscription
+        return None
 
     def create_stripe_customer(self, email, source, metadata=None):
         logger.info(

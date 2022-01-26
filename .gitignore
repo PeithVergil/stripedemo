@@ -1,0 +1,8 @@
+*.db
+*.pyc
+*.swp
+
+.DS_Store
+
+# WARNING: Contains sensitive info. Keep out of the repo.
+stripedemo/settings.py

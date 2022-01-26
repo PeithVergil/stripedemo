@@ -122,3 +122,34 @@ class Customer(BaseModel):
 #             self.report_id,
 #             self.report_status,
 #         )
+
+
+class Subscription(BaseModel):
+
+    #########################
+    # CUSTOMER
+    #########################
+    customer = peewee.ForeignKeyField(Customer, backref='subscriptions', null=False)
+
+    #########################
+    # SUBSCRIPTION
+    #########################
+    # Example:
+    #
+    # sub_1KMGEBDESBOwdUc02i6z18Fy
+    subscription_id     = peewee.CharField(50)
+    
+
+    #########################
+    # TIMESTAMP
+    #########################
+    date_created = peewee.DateTimeField(null=False)
+    date_updated = peewee.DateTimeField(null=False)
+
+    def __str__(self):
+        s = 'Subscription(id={}, customer={}, subscription_id={})'
+        return s.format(
+            self.id,
+            self.customer,
+            self.subscription_id,
+        )
