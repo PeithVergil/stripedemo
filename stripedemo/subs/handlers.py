@@ -3,7 +3,7 @@ import imp
 
 import random
 
-# from ..core.decorators import login_required
+from ..core.decorators import login_required
 from ..core.handlers import BaseRequestHandler
 
 from ..settings import STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY
@@ -11,7 +11,7 @@ from ..settings import STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY
 
 class Index(BaseRequestHandler):
 
-    # @login_required
+    @login_required
     def get(self):
         self.render(
             'subs/index.html',
@@ -22,6 +22,7 @@ class Index(BaseRequestHandler):
 
 class Subscribe(BaseRequestHandler):
 
+    @login_required
     def post(self):
         if not self.create_stripe_customer():
             self.set_status(400)
@@ -46,19 +47,16 @@ class Subscribe(BaseRequestHandler):
         ))
 
     def create_stripe_customer(self):
+        user = self.current_user
         name = self.get_argument('name')
-        email = self.get_argument('email')
         token = self.get_argument('stripeToken')
 
-        # TODO: Use an actual user ID.
-        user_id = random.randint(1, 999999)
-
         self.customer = self.stripe.verify_customer(
-            email=email,
+            user=user,
             source=token,
             metadata=dict(
                 name=name,
-                user_id=user_id,
+                user_id=user['id'],
             ),
         )
         if self.customer is None:

@@ -29,6 +29,18 @@ def build_routes(main):
             name='login',
         ),
         url(
+            r'/logout',
+            auth.Logout,
+            kwargs,
+            name='logout',
+        ),
+        url(
+            r'/register',
+            auth.Register,
+            kwargs,
+            name='register',
+        ),
+        url(
             r'/tokens',
             auth.Tokens,
             kwargs,

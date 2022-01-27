@@ -20,6 +20,10 @@ class User(BaseModel):
     username = CharField(max_length=90, unique=True)
     password = CharField(max_length=90)
 
+    @property
+    def email(self):
+        return self.username
+
     @staticmethod
     def new(username, password):
         with database:

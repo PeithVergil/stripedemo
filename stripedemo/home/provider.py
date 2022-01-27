@@ -20,24 +20,24 @@ class StripeProvider:
     def __init__(self):
         stripe.api_key = STRIPE_SECRET_KEY
 
-    def verify_customer(self, email, source, metadata=None):
-        customer = self.select_customer(email)
+    def verify_customer(self, user, source, metadata=None):
+        customer = self.select_customer(user)
         if customer is None:
-            customer = self.insert_customer(email, source, metadata)
+            customer = self.insert_customer(user, source, metadata)
         return customer
 
-    def insert_customer(self, email, source, metadata=None):
+    def insert_customer(self, user, source, metadata=None):
         logger.info(
-            'Inserting new customer info into the database: {}'.format(email)
+            'Inserting new customer info into the database: {}'.format(user['email'])
         )
-        stripe_customer = self.create_stripe_customer(email, source, metadata)
+        stripe_customer = self.create_stripe_customer(user['email'], source, metadata)
         if stripe_customer is None:
             return None
 
         now = datetime.utcnow()
         try:
             customer = Customer.create(
-                email=email,
+                user_id=user['id'],
                 customer_id=stripe_customer.id,
                 date_created=now,
                 date_updated=now,
@@ -51,14 +51,14 @@ class StripeProvider:
             return customer
         return None
 
-    def select_customer(self, email):
+    def select_customer(self, user):
         logger.info(
-            'Selecting customer info from the database: {}'.format(email)
+            'Selecting customer info from the database: {}'.format(user['email'])
         )
         query = (
             Customer
             .select()
-            .where(Customer.email == email)
+            .where(Customer.user_id == user['id'])
         )
 
         customer = query.first()

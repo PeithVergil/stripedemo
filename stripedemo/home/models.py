@@ -1,14 +1,15 @@
 import peewee
 
 from ..core.models import BaseModel
+from ..auth.models import User
 
 
 class Customer(BaseModel):
 
-    # Example:
-    #
-    # user@example.com
-    email = peewee.CharField(100, unique=True)
+    #########################
+    # USER
+    #########################
+    user = peewee.ForeignKeyField(User, backref='customers', null=False)
 
     # Example:
     #
@@ -19,8 +20,8 @@ class Customer(BaseModel):
     date_updated = peewee.DateTimeField()
 
     def __str__(self):
-        return 'Customer(id={}, email={}, customer_id={})'.format(
-            self.id, self.email, self.customer_id,
+        return 'Customer(id={}, user={}, customer_id={})'.format(
+            self.id, self.user, self.customer_id,
         )
 
 

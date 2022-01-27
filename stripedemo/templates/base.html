@@ -17,6 +17,23 @@
   </head>
 
   <body>
+    {% if current_user %}
+      <nav class="navbar navbar-light bg-light justify-content-between">
+        <span class="navbar-brand mb-0 h1">
+          The Shop
+        </span>
+
+        <span class="navbar-text">
+          {{ current_user['email'] }}
+        </span>
+
+        <form class="form-inline" action="{{ reverse_url('logout') }}" method="post">
+          <button type="submit" class="btn btn-secondary">
+            Sign Out
+          </button>
+        </form>
+      </nav>
+    {% end %}
 
     {% block page %}{% end %}
 

@@ -14,3 +14,14 @@ class LoginForm(Form):
     remember = StringField('Remember', [
         validators.Optional(),
     ])
+
+
+class RegistrationForm(Form):
+
+    username = StringField('Username', [
+        validators.DataRequired(),
+    ])
+
+    password = StringField('Password', [
+        validators.DataRequired(),
+    ])

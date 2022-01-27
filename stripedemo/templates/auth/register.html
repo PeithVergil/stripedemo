@@ -4,10 +4,10 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4 offset-md-4 my-5">
-                <form id="form-signin" class="form-signin" method="post">
+                <form id="form-register" class="form-register" method="post">
                     <div class="card">
                         <div class="card-header text-center">
-                            Welcome!
+                            Create a new account
                         </div>
                         <div class="card-body">
                             {% module xsrf_form_html() %}
@@ -30,17 +30,12 @@
         
                         </div>
                         <div class="card-footer">
-                            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign In</button>
+                            <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
                         </div>
                     </div>
 
                     <input type="hidden" name="redirect" value="{{ redirect }}">
                 </form>
-            </div>
-            <div class="col-md-4 offset-md-4">
-                <a class="btn btn-lg btn-link btn-block" href="{{ reverse_url('register') }}">
-                    Create an Account
-                </a>
             </div>
         </div>
     </div>

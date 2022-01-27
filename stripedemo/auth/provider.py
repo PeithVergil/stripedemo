@@ -19,7 +19,7 @@ from ..settings import (
     AUTH_LOGIN_URL,
     AUTH_PEOPLE_URL,
 )
-from .models import Token
+from .models import User, Token
 
 
 logger = logging.getLogger(__name__)
@@ -62,47 +62,37 @@ class AuthProvider:
         if user is None:
             return None
         return await self.create_session(user)
+    
+    async def logout(self, token):
+        return await self.delete_session(token)
+    
+    async def register(self, username, password):
+        return User.new(username, password_hash(password))
 
     async def save_token(self, user, token):
         # Run blocking call on a separate thread.
         return await self.main.execute(save_token, user, token)
 
     async def authenticate(self, username, password):
-        body = json_encode({
-            'username': username,
-            'password': password,
-            'client_id': AUTH_CLIENT_ID,
-            'grant_type': 'password',
-        })
-        method = 'POST'
-        headers = {
-            'Content-Type': 'application/json; charset=UTF-8'
-        }
-        http = AsyncHTTPClient()
-        try:
-            response = await http.fetch(
-                AUTH_LOGIN_URL,
-                body=body,
-                method=method,
-                headers=headers,
-                validate_cert=False,
-            )
-        except HTTPError as error:
-            logger.exception(
-                'Failed to authenticate user: {}'.format(username)
-            )
-            return None
-
-        data = json_decode(response.body)
-
-        user = await self.fetch_user_info(data['access_token'])
-        if user is None:
-            return None
-
-        return _AuthInfo(
-            data['access_token'],
-            user,
+        query = (
+            User
+            .select()
+            .where(User.username == username)
         )
+
+        user = query.first()
+
+        if user is None:
+            logger.info('User not found.')
+            return None
+        
+        if not password_check(password, user.password):
+            logger.info('Incorrect password.')
+            return None
+
+        logger.info('Got user: {}'.format(user))
+
+        return user
 
     async def fetch_user_profile(self, access_token):
         headers = {
@@ -158,12 +148,11 @@ class AuthProvider:
             contact.qrcode,
         )
 
-    async def create_session(self, authinfo):
-        user = authinfo.user
+    async def create_session(self, user):
         data = dict(
             id=user.id,
             name='',
-            email=user.email,
+            email=user.username,
         )
         token = create_session_token(user)
 
@@ -178,6 +167,9 @@ class AuthProvider:
             return None
         logger.debug('Session saved.')
         return token
+    
+    async def delete_session(self, token):
+        return await self.session.delete(token)
 
 
 def save_token(user, token):
