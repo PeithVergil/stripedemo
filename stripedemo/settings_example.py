@@ -1,3 +1,6 @@
+"""
+This is just a sample settings file. All information stored here are dummy values.
+"""
 import os
 
 
@@ -11,6 +14,8 @@ DEBUG = True
 SECRET = (
     'sWArxfCwlgtf6YCKfxs0'
     'Zfs1ILq3gUYnqnAIYIfS'
+    'p4nRxB0PYYr0RyHzkzqA'
+    'PZJno27GdJC0pItpyJoK'
 )
 DATABASE = os.path.join(os.path.dirname(ROOT), 'stripedemo.db')
 
@@ -49,5 +54,5 @@ AUTH_PEOPLE_URL = 'https://auth.example.com/profile/me'
 #
 # Test settings.
 #
-TEST_USERNAME = os.getenv('STRIPEDEMO_TEST_USERNAME', 'sample_username')
-TEST_PASSWORD = os.getenv('STRIPEDEMO_TEST_PASSWORD', 'sample_password')
+TEST_USERNAME = os.getenv('STRIPEDEMO_TEST_USERNAME', 'jane.doe@example.com')
+TEST_PASSWORD = os.getenv('STRIPEDEMO_TEST_PASSWORD', 'yfz80cs696ZrN4s7x1Bl')

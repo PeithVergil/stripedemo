@@ -60,4 +60,10 @@ def build_routes(main):
             kwargs,
             name='subscribe',
         ),
+        url(
+            r'/subscriptions',
+            subs.Subscriptions,
+            kwargs,
+            name='subscriptions',
+        ),
     ]

@@ -1,0 +1,14 @@
+{% extends '../base.html' %}
+
+{% block page %}
+    <div class="container">
+        <div class="row">
+            <div class="col-6 offset-3">
+                {% for sub in subs %}
+                    {{ sub }}
+                {% end %}
+            </div>
+        </div>
+      </div>
+    </div>
+{% end %}

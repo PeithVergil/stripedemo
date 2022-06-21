@@ -8,7 +8,7 @@ from ..settings import STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY
 
 class Index(BaseRequestHandler):
 
-    # @login_required
+    @login_required
     def get(self):
         self.render(
             'home/index.html',
