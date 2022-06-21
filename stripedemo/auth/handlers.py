@@ -1,9 +1,10 @@
 import logging
 from turtle import done
 
+from ..core.decorators import login_required
 from ..core.handlers import BaseRequestHandler
 from ..settings import AUTH_LOGIN_URL
-from .forms import LoginForm, RegistrationForm
+from .forms import OTPForm, LoginForm, RegistrationForm
 
 
 logger = logging.getLogger(__name__)
@@ -158,6 +159,67 @@ class Register(BaseRequestHandler):
         redirect = self.get_argument('redirect', None)
         if redirect is None:
             redirect = self.reverse_url('login')
+        logger.info('Redirecting to: {}'.format(redirect))
+        self.redirect(redirect)
+
+
+class OTP(BaseRequestHandler):
+
+    async def get(self):
+        await self.otp_form()
+    
+    async def post(self):
+        form = OTPForm(otpvalue=self.get_argument('otpvalue', ''))
+
+        if form.validate():
+            await self.form_valid(form)
+        else:
+            await self.form_error(form)
+
+    async def form_valid(self, form):
+        verified = await self.auth.otp_verify(self.current_user['id'], form.otpvalue.data)
+
+        if not verified:
+            messages = dict(
+                otp='Invalid OTP.',
+            )
+            await self.otp_form(messages)
+        else:
+            await self.otp_done()
+
+    async def form_error(self, form):
+        messages = dict()
+        for field_name, field_errors in form.errors.items():
+            for field_error in field_errors:
+                messages[field_name] = field_error
+
+        self.write(messages)
+    
+    async def otp_form(self, messages=None):
+        self.render(
+            'auth/otp.html',
+            otpvalue=self.get_argument('otpvalue', ''),
+            redirect=self.get_argument('redirect', self.reverse_url('login')),
+            messages=messages,
+        )
+
+    async def otp_done(self):
+        token = self.get_secure_cookie('session')
+
+        if token is not None:
+            self.current_user['otp_verified'] = True
+
+            saved = await self.session.set(token.decode(), self.current_user)
+
+            if saved:
+                logger.debug('The session has been updated.')
+            else:
+                logger.debug('The session was not updated.')
+
+        # Redirect back to the authorization page.
+        redirect = self.get_argument('redirect', None)
+        if redirect is None:
+            redirect = self.reverse_url('home')
         logger.info('Redirecting to: {}'.format(redirect))
         self.redirect(redirect)
 

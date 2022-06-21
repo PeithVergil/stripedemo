@@ -18,7 +18,14 @@ def login_required(func):
             args = [
                 ('redirect', self.request.uri),
             ]
-            self.redirect(url_concat(self.reverse_url('login'), args))
-        else:
-            return func(self, *args, **kwargs)
+            return self.redirect(url_concat(self.reverse_url('login'), args))
+        
+        if self.current_user['otp_required'] and not self.current_user['otp_verified']:
+            # Redirect the user back to the current page after logging in.
+            args = [
+                ('redirect', self.request.uri),
+            ]
+            return self.redirect(url_concat(self.reverse_url('otp'), args))
+
+        return func(self, *args, **kwargs)
     return wrapper

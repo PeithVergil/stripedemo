@@ -1,3 +1,4 @@
+import pyotp
 import base64
 import hashlib
 import logging
@@ -93,6 +94,31 @@ class AuthProvider:
         logger.info('Got user: {}'.format(user))
 
         return user
+    
+    async def otp_verify(self, user_id, value):
+        query = (
+            User
+            .select()
+            .where(User.id == user_id)
+        )
+
+        user = query.first()
+
+        if user is None:
+            logger.info('User not found.')
+            return False
+        
+        totp = pyotp.TOTP(user.secret.encode())
+
+        logger.debug('Verifying the OTP: %s', value)
+
+        if totp.verify(value):
+            logger.debug('The OTP is valid: %s', value)
+            return True
+
+        logger.debug('The OTP is invalid: %s', value)
+
+        return False
 
     async def fetch_user_profile(self, access_token):
         headers = {
@@ -149,10 +175,15 @@ class AuthProvider:
         )
 
     async def create_session(self, user):
+        # Require the user to enter an OTP if there's a secret key.
+        otp_required = True if user.secret is not None else False
+
         data = dict(
             id=user.id,
             name='',
             email=user.username,
+            otp_required=otp_required,
+            otp_verified=False,
         )
         token = create_session_token(user)
 
@@ -208,43 +239,16 @@ def password_check(password, hashed_password):
     return pass_b16 == hash
 
 
-# def create_session(user):
-#     data = dict(
-#         id=user.id, name=user.username,
-#     )
-#     token = _token(user)
-
-#     logger.debug('Saving session: token={} data={}'.format(
-#         token,
-#         data,
-#     ))
-
-#     if remember:
-#         # The session will expire in a month.
-#         ttl = 2592000
-#     else:
-#         # The session will expire in an hour.
-#         ttl = None
-
-#     saved = await self.session.set(token, data, ttl)
-#     if saved:
-#         logger.debug('Session saved.')
-#         return token
-#     else:
-#         logger.debug('Session not saved.')
-#         return None
-
-
 def create_session_token(user):
-        tkn, now = secrets.token_hex(16), datetime.utcnow()
-        # Generate a random value which will
-        # be used to create the session token.
-        #
-        # Example:
-        # 123456$61ac314a682e7fa2c958fb1daa4ecb64
-        value = '{}${}${}'.format(
-            user.id, tkn, now.timestamp()
-        )
+    tkn, now = secrets.token_hex(16), datetime.utcnow()
+    # Generate a random value which will
+    # be used to create the session token.
+    #
+    # Example:
+    # 123456$61ac314a682e7fa2c958fb1daa4ecb64
+    value = '{}${}${}'.format(
+        user.id, tkn, now.timestamp()
+    )
 
-        # The session token is a SHA256 hash of the above.
-        return hashlib.sha256(value.encode()).hexdigest()
+    # The session token is a SHA256 hash of the above.
+    return hashlib.sha256(value.encode()).hexdigest()

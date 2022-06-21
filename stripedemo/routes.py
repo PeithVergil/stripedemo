@@ -46,6 +46,12 @@ def build_routes(main):
             kwargs,
             name='tokens',
         ),
+        url(
+            r'/otp',
+            auth.OTP,
+            kwargs,
+            name='otp',
+        ),
 
         # Stripe subscription demo
         url(

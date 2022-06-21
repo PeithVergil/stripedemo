@@ -1,0 +1,38 @@
+{% extends '../base.html' %}
+
+{% block page %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 offset-md-4 my-5">
+                <form id="form-signin" class="form-signin" method="post">
+                    <div class="card">
+                        <div class="card-header text-center">
+                            Enter your OTP
+                        </div>
+                        <div class="card-body">
+                            {% module xsrf_form_html() %}
+        
+                            {% if messages %}
+                                {% for field_name, field_error in messages.items() %}
+                                    <div class="alert alert-danger text-center" role="alert">
+                                        {{ field_error }}
+                                    </div>
+                                {% end %}
+                            {% end %}
+        
+                            <div class="mb-2">
+                                <input type="text" id="id_otp" class="form-control" name="otpvalue" value="{{ otpvalue }}" required autofocus>
+                            </div>
+        
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-lg btn-primary btn-block" type="submit">Verify</button>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="redirect" value="{{ redirect }}">
+                </form>
+            </div>
+        </div>
+    </div>
+{% end %}

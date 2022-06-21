@@ -20,6 +20,9 @@ class User(BaseModel):
     username = CharField(max_length=90, unique=True)
     password = CharField(max_length=90)
 
+    # The shared OTP secret
+    secret = CharField(max_length=50, null=True)
+
     @property
     def email(self):
         return self.username

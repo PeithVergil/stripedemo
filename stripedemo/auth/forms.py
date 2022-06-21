@@ -25,3 +25,10 @@ class RegistrationForm(Form):
     password = StringField('Password', [
         validators.DataRequired(),
     ])
+
+
+class OTPForm(Form):
+
+    otpvalue = StringField('OTP', [
+        validators.DataRequired(),
+    ])
