@@ -15,7 +15,6 @@ from ..settings import (
     HASH_FUNC,
     HASH_ITER,
     SALT_BITS,
-    AUTH_CLIENT_ID,
     AUTH_BASE_URL,
     AUTH_LOGIN_URL,
     AUTH_PEOPLE_URL,
@@ -245,7 +244,7 @@ def create_session_token(user):
     # be used to create the session token.
     #
     # Example:
-    # 123456$61ac314a682e7fa2c958fb1daa4ecb64
+    # 123456$61ac314a682e7fa2c958fb1daa4ecb64$1655796867.389337
     value = '{}${}${}'.format(
         user.id, tkn, now.timestamp()
     )

@@ -22,7 +22,7 @@ from .session.provider import SessionProvider
 if DEBUG:
     logging.basicConfig(level=logging.DEBUG)
 else:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, filename='stripedemo.log')
 
 logger = logging.getLogger(__name__)
 

@@ -94,4 +94,4 @@ class Subscriptions(BaseRequestHandler):
     def get(self):
         subs = self.subs.all()
 
-        self.render( 'subs/subscriptions.html', subs=subs)
+        self.render('subs/subscriptions.html', subs=subs)

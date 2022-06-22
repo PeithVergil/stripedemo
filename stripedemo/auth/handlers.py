@@ -1,7 +1,6 @@
 import logging
-from turtle import done
 
-from ..core.decorators import login_required
+from ..core.decorators import otp_required
 from ..core.handlers import BaseRequestHandler
 from ..settings import AUTH_LOGIN_URL
 from .forms import OTPForm, LoginForm, RegistrationForm
@@ -165,9 +164,11 @@ class Register(BaseRequestHandler):
 
 class OTP(BaseRequestHandler):
 
+    @otp_required
     async def get(self):
         await self.otp_form()
     
+    @otp_required
     async def post(self):
         form = OTPForm(otpvalue=self.get_argument('otpvalue', ''))
 
@@ -216,7 +217,6 @@ class OTP(BaseRequestHandler):
             else:
                 logger.debug('The session was not updated.')
 
-        # Redirect back to the authorization page.
         redirect = self.get_argument('redirect', None)
         if redirect is None:
             redirect = self.reverse_url('home')

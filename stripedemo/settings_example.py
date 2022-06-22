@@ -10,7 +10,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 ENV = 'default'
 PORT = 9000
-DEBUG = True
+DEBUG = False
 SECRET = (
     'sWArxfCwlgtf6YCKfxs0'
     'Zfs1ILq3gUYnqnAIYIfS'
